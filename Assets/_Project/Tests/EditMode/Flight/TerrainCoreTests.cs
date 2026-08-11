@@ -329,5 +329,35 @@ namespace Cirrus.Tests.Terrain
             using var garbage = new MemoryStream(new byte[] { 9, 9, 9, 9, 9, 9, 9, 9 });
             Assert.Throws<InvalidDataException>(() => { TilePyramidFormat.Read(garbage); });
         }
+
+        /// <summary>
+        /// Cross-language contract: reads the fixture written by the Python
+        /// pipeline (tools/terrain-pipeline/tile_format.py). If this fails, the
+        /// two writers have diverged — fix the format, regenerate the fixture.
+        /// </summary>
+        [Test]
+        public void GoldenFileFromPythonPipelineReads()
+        {
+            string? directory = AppContext.BaseDirectory;
+            string? fixture = null;
+            while (directory != null)
+            {
+                string candidate = Path.Combine(directory, "Assets", "_Project", "Tests", "Fixtures", "golden.ctil");
+                if (File.Exists(candidate)) { fixture = candidate; break; }
+                directory = Path.GetDirectoryName(directory);
+            }
+            Assert.IsNotNull(fixture, "golden.ctil fixture not found above the test directory");
+
+            using FileStream stream = File.OpenRead(fixture!);
+            (TileAddress tile, short[] samples) = TilePyramidFormat.Read(stream);
+
+            Assert.AreEqual(new TileAddress(5, 7, 21), tile);
+            // Python wrote grid[r, c] = r - 0.5*c metres.
+            int n = TilePyramidFormat.SamplesPerSide;
+            Assert.AreEqual(0, samples[0]);                       // r0 c0
+            Assert.AreEqual(-5, samples[1]);                      // r0 c1: -0.5 m
+            Assert.AreEqual(10, samples[n]);                      // r1 c0: 1.0 m
+            Assert.AreEqual(1280 - 640, samples[n * 128 + 128]);  // r128 c128
+        }
     }
 }
