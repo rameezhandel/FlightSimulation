@@ -3,9 +3,11 @@
   <!--
     Headless test harness for the pure-C# flight core.
 
-    Compiles the aero sources from Assets/_Project/Scripts/{Flight,Aircraft} plus the
-    NUnit tests from Assets/_Project/Tests/EditMode by link, so `dotnet test` runs the
-    exact same files Unity Test Framework will run in-editor. No Unity required.
+    Compiles the pure aero sources (Scripts/Flight and Scripts/Aircraft/Definitions —
+    the folders whose asmdefs set noEngineReferences) plus the NUnit tests from
+    Tests/EditMode/Flight by link, so `dotnet test` runs the exact same files Unity
+    Test Framework runs in-editor. Unity-only tests live in Tests/EditMode/Unity and
+    are deliberately NOT included here.
 
     LangVersion is pinned to 9.0 to stay within what Unity 6 compiles.
   -->
@@ -22,8 +24,8 @@
 
   <ItemGroup>
     <Compile Include="../../Assets/_Project/Scripts/Flight/**/*.cs" LinkBase="Flight" />
-    <Compile Include="../../Assets/_Project/Scripts/Aircraft/**/*.cs" LinkBase="Aircraft" />
-    <Compile Include="../../Assets/_Project/Tests/EditMode/**/*.cs" LinkBase="Tests" />
+    <Compile Include="../../Assets/_Project/Scripts/Aircraft/Definitions/**/*.cs" LinkBase="Aircraft" />
+    <Compile Include="../../Assets/_Project/Tests/EditMode/Flight/**/*.cs" LinkBase="Tests" />
   </ItemGroup>
 
   <ItemGroup>

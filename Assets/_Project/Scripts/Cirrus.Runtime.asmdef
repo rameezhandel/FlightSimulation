@@ -1,0 +1,18 @@
+{
+    "name": "Cirrus.Runtime",
+    "rootNamespace": "Cirrus",
+    "references": [
+        "Cirrus.Flight",
+        "Cirrus.Aircraft.Definitions",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
