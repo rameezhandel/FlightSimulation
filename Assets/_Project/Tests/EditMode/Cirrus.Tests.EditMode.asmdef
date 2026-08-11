@@ -4,6 +4,7 @@
     "references": [
         "Cirrus.Flight",
         "Cirrus.Aircraft.Definitions",
+        "Cirrus.Terrain",
         "Cirrus.Runtime",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"

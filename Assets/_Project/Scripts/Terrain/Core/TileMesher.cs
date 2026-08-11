@@ -15,6 +15,7 @@ namespace Cirrus.Terrain
         public float[] Positions = Array.Empty<float>(); // xyz triplets
         public float[] Normals = Array.Empty<float>();   // xyz triplets
         public float[] Uvs = Array.Empty<float>();       // uv pairs
+        public byte[] Colors = Array.Empty<byte>();      // rgba quads: provisional landcover tint
         public int[] Triangles = Array.Empty<int>();
         public int VertexCount => Positions.Length / 3;
     }
@@ -44,6 +45,7 @@ namespace Cirrus.Terrain
                 Positions = new float[(gridVerts + skirtVerts) * 3],
                 Normals = new float[(gridVerts + skirtVerts) * 3],
                 Uvs = new float[(gridVerts + skirtVerts) * 2],
+                Colors = new byte[(gridVerts + skirtVerts) * 4],
                 Triangles = new int[(QuadsPerSide * QuadsPerSide * 2 + 4 * QuadsPerSide * 2) * 3],
             };
 
@@ -72,6 +74,8 @@ namespace Cirrus.Terrain
 
                     data.Uvs[v * 2 + 0] = (float)c / QuadsPerSide;
                     data.Uvs[v * 2 + 1] = (float)r / QuadsPerSide;
+
+                    WriteLandcoverColor(data.Colors, v, h, data.Normals[v * 3 + 1]);
                 }
             }
 
@@ -117,6 +121,27 @@ namespace Cirrus.Terrain
             return data;
         }
 
+        /// <summary>
+        /// Provisional landcover tint by elevation band and slope (real procedural
+        /// texturing from ESA WorldCover classes replaces this later in M2 — see
+        /// CLAUDE.md §5). Bands: tidal flat, conifer, alpine meadow-rock, rock,
+        /// snow; steep faces read as rock regardless of altitude.
+        /// </summary>
+        static void WriteLandcoverColor(byte[] colors, int vertex, float elevation, float normalUp)
+        {
+            byte red, green, blue;
+            if (elevation < 1f) { red = 116; green = 106; blue = 84; }        // tidal flat / shore
+            else if (elevation < 350f) { red = 44; green = 78; blue = 46; }   // conifer forest
+            else if (elevation < 700f) { red = 76; green = 92; blue = 60; }   // subalpine
+            else if (elevation < 1000f) { red = 118; green = 114; blue = 108; } // rock
+            else { red = 235; green = 238; blue = 240; }                       // snow / glacier
+            if (normalUp < 0.72f && elevation > 1f) { red = 104; green = 100; blue = 96; } // cliffs
+            colors[vertex * 4 + 0] = red;
+            colors[vertex * 4 + 1] = green;
+            colors[vertex * 4 + 2] = blue;
+            colors[vertex * 4 + 3] = 255;
+        }
+
         static int AddSkirtVertex(TileMeshData data, int dest, int sourceVertex, float skirtDepth)
         {
             data.Positions[dest * 3 + 0] = data.Positions[sourceVertex * 3 + 0];
@@ -127,6 +152,8 @@ namespace Cirrus.Terrain
             data.Normals[dest * 3 + 2] = data.Normals[sourceVertex * 3 + 2];
             data.Uvs[dest * 2 + 0] = data.Uvs[sourceVertex * 2 + 0];
             data.Uvs[dest * 2 + 1] = data.Uvs[sourceVertex * 2 + 1];
+            for (int channel = 0; channel < 4; channel++)
+                data.Colors[dest * 4 + channel] = data.Colors[sourceVertex * 4 + channel];
             return dest + 1;
         }
 

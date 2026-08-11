@@ -78,7 +78,7 @@ namespace Cirrus.Core
             return flight;
         }
 
-        static void BuildPlaceholderVisuals(Transform parent)
+        public static void BuildPlaceholderVisuals(Transform parent)
         {
             // Proportions eyeballed from the DHC-2 3-view; purely a visual stand-in.
             AddPart(parent, PrimitiveType.Capsule, new Vector3(0f, 0f, 0.3f), new Vector3(1.4f, 1.4f, 8.5f), rotateCapsule: true);
@@ -97,7 +97,7 @@ namespace Cirrus.Core
             if (rotateCapsule) part.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
         }
 
-        static void BuildContactColliders(GameObject root)
+        public static void BuildContactColliders(GameObject root)
         {
             var material = new PhysicsMaterial("Skid") { dynamicFriction = 0.5f, staticFriction = 0.6f };
             // Crude tricycle of skids so the ground stops us; real gear/floats later in M1.

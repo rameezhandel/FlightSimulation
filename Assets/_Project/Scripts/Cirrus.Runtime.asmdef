@@ -4,6 +4,7 @@
     "references": [
         "Cirrus.Flight",
         "Cirrus.Aircraft.Definitions",
+        "Cirrus.Terrain",
         "Unity.InputSystem"
     ],
     "includePlatforms": [],
