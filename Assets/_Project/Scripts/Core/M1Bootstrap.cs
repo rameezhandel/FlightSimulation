@@ -54,6 +54,9 @@ namespace Cirrus.Core
             var body = root.AddComponent<Rigidbody>();
             FlightBody flight = root.AddComponent<FlightBody>(); // configures the Rigidbody in Awake
             var input = root.AddComponent<FlightInputController>();
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            root.AddComponent<Cirrus.DebugTools.FlightRecorder>(); // press R to dump the last 5 min
+#endif
 
             BuildPlaceholderVisuals(root.transform);
             BuildContactColliders(root);
