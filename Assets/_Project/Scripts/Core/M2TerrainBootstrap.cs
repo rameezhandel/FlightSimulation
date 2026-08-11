@@ -58,6 +58,9 @@ namespace Cirrus.Core
 
             CreateWater();
             CreateCameraAndOverlay(flight, origin);
+
+            var weather = originObject.AddComponent<Cirrus.AtmosphereRuntime.WeatherController>();
+            weather.Initialize(Cirrus.Atmosphere.WeatherPreset.Breeze, flight);
         }
 
         void LateUpdate()
