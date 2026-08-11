@@ -216,32 +216,42 @@ post-launch. Do not start it early.
 
 ## 11. Current status
 
-M1 in progress. The flight core was built first, test-driven and headless
-(`tools/flightcore-tests/`, run with `dotnet test` — 36 tests green).
+M1 code-complete headlessly; M2/M3 cores built. 83 headless tests green
+(`dotnet test tools/flightcore-tests`), 8 Python pipeline tests green
+(`python3 -m unittest test_pipeline` in `tools/terrain-pipeline`). All Unity
+code passes a stub-API compile check but has NEVER been compiled by a real
+Unity Editor — that is the single biggest outstanding risk.
 
 Done:
-- Blade-element aero core in `Scripts/Flight/` (ISA atmosphere, post-stall
-  airfoil, strip forces, engine/prop, 6-DOF test integrator, trim solver).
-  Pure C#, no Unity types; frame conventions in `docs/decisions/0001`.
-- Beaver (landplane) definition, all four §4 validation gates green: stall
-  52.8 kt (pub. 52.1), cruise 122.8 kt (pub. 124.3), climb 1045 fpm (pub.
-  1020), hands-off stable when trimmed.
-- Minimal Unity shell (manifest, 200 Hz TimeManager, asmdefs enforcing core
-  purity) + MonoBehaviour glue: `FlightBody` (per-surface AddForceAtPosition),
-  `CoreFrame` (the one Unity<->core conversion), dev input, chase camera, dev
-  overlay, procedural M1 test scene (`M1Bootstrap`). See `docs/decisions/0002`.
-- Flight recorder (§8): 10 Hz full-state ring buffer in-app (press R to dump),
-  versioned binary format, deterministic headless replay via `FlightReplay`;
-  repro workflow documented in `Tests/Recordings/README.md`. The Unity glue
-  additionally passes a stub-API compile check, but has still never been
-  compiled by a real Unity Editor.
+- Flight core (§4): blade-element aero, post-stall airfoil, trim solver,
+  6-DOF test integrator, ground effect, slipstream (+swirl), P-factor,
+  windmilling drag, engine reaction torque. All four validation gates green
+  (stall 52.8 kt / cruise 122.3 kt / climb 1038 fpm / hands-off stable);
+  powered slow trim carries right rudder emergently. `docs/flight-model.md`.
+- Beaver landplane definition ([W]/[FDC]/[EST] source tags); float variant
+  pending float POH data.
+- Unity glue: `FlightBody` (per-surface AddForceAtPosition at 200 Hz),
+  `CoreFrame` (the one frame conversion), dev input, chase camera, dev
+  overlay, flight recorder (press R; deterministic replay, §8). Decisions
+  0001/0002.
+- M2 terrain: region projection (280 km SE Alaska — see decision 0003),
+  quadtree LOD + skirts, threaded tile meshing with landcover vertex colors,
+  floating origin (5 km, invariant-tested), synthetic fjord terrain + PAJN
+  runway pad, `.ctil` pyramid format with cross-language golden test, DEM
+  pipeline in `tools/terrain-pipeline`. `M2TerrainBootstrap` = drop-in scene.
+- M3 core: deterministic wind field (boundary-layer profile, gusts,
+  turbulence; Calm/Breeze/Storm presets) wired into the flight model.
 
-Next (needs the Unity Editor — follow the first-open checklist in decision
-0002, then commit the generated metas):
-- First in-editor flight; run `Tests/EditMode/Unity` conversion tests in the
-  Test Runner; assign the URP asset.
-- Then: handling-quality tuning against the M1 gate ("stalls correctly, fun
-  for ten minutes"), and the flight-model gaps in docs/flight-model.md
-  §limitations (slipstream, P-factor, ground effect, float variant).
+Known deviations (decision 0003): meshing on ThreadPool not Jobs/Burst yet;
+water is the forbidden blue plane until the real water system lands.
+
+Next:
+- IN EDITOR (first-open checklist in decision 0002): compile everything, run
+  the Unity-only tests, fly M1Bootstrap then M2TerrainBootstrap, commit metas.
+- Then, in rough order: real water system; file-backed tile source +
+  StreamingAssets pipeline output; landcover texturing (WorldCover); Burst
+  meshing port; M3 rendering (scattering, clouds, time of day); M4 product
+  work (cockpit, instruments, menus, flight planning, save, touch schemes,
+  tutorial). M4 is deliberately untouched — it is all editor-bound UI work.
 
 *(Keep this section updated. It is the first thing read in every new session.)*
