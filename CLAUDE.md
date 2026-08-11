@@ -216,6 +216,24 @@ post-launch. Do not start it early.
 
 ## 11. Current status
 
-M1, not started. Empty Unity project.
+M1 in progress. No Unity project yet — the pure-C# flight core came first so it
+could be built test-first and validated headlessly (`tools/flightcore-tests/`,
+run with `dotnet test`).
+
+Done:
+- Blade-element aero core in `Assets/_Project/Scripts/Flight/` (ISA atmosphere,
+  post-stall airfoil model, strip forces, engine/prop, 6-DOF test integrator,
+  quasi-static trim solver). No Unity types; see `docs/decisions/0001`.
+- Beaver (landplane) definition with sourced constants; all four §4 validation
+  gates green: stall 52.8 kt (pub. 52.1), cruise 122.8 kt (pub. 124.3), climb
+  1045 fpm (pub. 1020), hands-off stable for 30 s when trimmed. 36 tests passing.
+
+Next:
+- Unity 6 project shell (created in-editor, then pushed), MonoBehaviour glue:
+  200 Hz fixed timestep, per-surface AddForceAtPosition, frame conversion
+  (see decision 0001 — core frame is right-handed, NOT Unity's).
+- Chase camera, dev overlay (airspeed/altitude/AoA/per-surface forces).
+- Flight-model gaps tracked in docs/flight-model.md §limitations (slipstream,
+  P-factor, ground effect, float variant).
 
 *(Keep this section updated. It is the first thing read in every new session.)*
