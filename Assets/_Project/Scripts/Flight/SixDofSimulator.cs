@@ -20,11 +20,17 @@ namespace Cirrus.Flight
             ref RigidBodyState state,
             in ControlInputs controls,
             in Vector3 wind,
-            float dt)
+            float dt,
+            float groundElevation = float.NegativeInfinity)
         {
-            AirState air = IsaAtmosphere.AtAltitude(state.Position.Z);
+            var env = new FlightEnvironment
+            {
+                Air = IsaAtmosphere.AtAltitude(state.Position.Z),
+                Wind = wind,
+                GroundElevation = groundElevation,
+            };
             AircraftForces loads = FlightDynamics.Compute(
-                aircraft, in state, in controls, in wind, in air, Span<SurfaceForceInfo>.Empty);
+                aircraft, in state, in controls, in env, Span<SurfaceForceInfo>.Empty);
 
             // Linear: aero/thrust force is body frame; gravity added in world frame.
             Vector3 forceWorld = MathUtil.BodyToWorld(state.Orientation, loads.Force)
@@ -52,11 +58,12 @@ namespace Cirrus.Flight
             ref RigidBodyState state,
             in ControlInputs controls,
             in Vector3 wind,
-            float seconds)
+            float seconds,
+            float groundElevation = float.NegativeInfinity)
         {
             int steps = (int)MathF.Round(seconds / FixedTimestep);
             for (int i = 0; i < steps; i++)
-                Step(aircraft, ref state, in controls, in wind, FixedTimestep);
+                Step(aircraft, ref state, in controls, in wind, FixedTimestep, groundElevation);
         }
     }
 }

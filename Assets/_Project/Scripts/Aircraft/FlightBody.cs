@@ -23,6 +23,12 @@ namespace Cirrus.Aircraft
         /// <summary>World-frame wind, core axes. Weather system plugs in here (M3).</summary>
         public System.Numerics.Vector3 WindCore;
 
+        /// <summary>
+        /// Terrain elevation (m) under the aircraft, for ground effect. M1 flies over
+        /// the flat plane at 0; the M2 terrain streamer replaces this delegate.
+        /// </summary>
+        public Func<UnityEngine.Vector3, float> GroundElevationProvider = _ => 0f;
+
         public AircraftDefinition Aircraft { get; private set; } = null!;
         public SurfaceForceInfo[] SurfaceForces { get; private set; } = Array.Empty<SurfaceForceInfo>();
         public AircraftForces LastLoads { get; private set; }
@@ -63,9 +69,14 @@ namespace Cirrus.Aircraft
                 AngularVelocity = CoreFrame.AngularVelocityToCoreBody(_body.angularVelocity, orientation),
             };
 
-            AirState air = IsaAtmosphere.AtAltitude(transform.position.y);
+            var env = new FlightEnvironment
+            {
+                Air = IsaAtmosphere.AtAltitude(transform.position.y),
+                Wind = WindCore,
+                GroundElevation = GroundElevationProvider(transform.position),
+            };
             AircraftForces loads = FlightDynamics.Compute(
-                Aircraft, in state, in Controls, in WindCore, in air, SurfaceForces);
+                Aircraft, in state, in Controls, in env, SurfaceForces);
             LastLoads = loads;
 
             System.Numerics.Vector3 airRelative =

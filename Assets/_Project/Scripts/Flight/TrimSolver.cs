@@ -124,7 +124,8 @@ namespace Cirrus.Flight
         static Vector3 LongitudinalResidual(AircraftDefinition aircraft, float speed, float altitude, in AirState air, float theta, in ControlInputs controls)
         {
             RigidBodyState state = RigidBodyState.LevelFlight(speed, altitude, theta);
-            AircraftForces loads = FlightDynamics.Compute(aircraft, in state, in controls, Vector3.Zero, in air, Span<SurfaceForceInfo>.Empty);
+            FlightEnvironment env = FlightEnvironment.FreeAir(in air);
+            AircraftForces loads = FlightDynamics.Compute(aircraft, in state, in controls, in env, Span<SurfaceForceInfo>.Empty);
             Vector3 forceWorld = MathUtil.BodyToWorld(state.Orientation, loads.Force);
             return new Vector3(
                 forceWorld.X,
@@ -170,16 +171,17 @@ namespace Cirrus.Flight
             for (int iter = 0; iter < 20; iter++)
             {
                 RigidBodyState state = RigidBodyState.LevelFlight(speed, altitude, theta);
-                AircraftForces loads = FlightDynamics.Compute(aircraft, in state, in controls, Vector3.Zero, in air, Span<SurfaceForceInfo>.Empty);
+                FlightEnvironment env = FlightEnvironment.FreeAir(in air);
+            AircraftForces loads = FlightDynamics.Compute(aircraft, in state, in controls, in env, Span<SurfaceForceInfo>.Empty);
                 float rx = loads.Torque.X, rz = loads.Torque.Z;
                 if (MathF.Abs(rx) < 0.5f && MathF.Abs(rz) < 0.5f)
                     return;
 
                 const float h = 1e-3f;
                 ControlInputs c = controls; c.Roll += h;
-                AircraftForces lr = FlightDynamics.Compute(aircraft, in state, in c, Vector3.Zero, in air, Span<SurfaceForceInfo>.Empty);
+                AircraftForces lr = FlightDynamics.Compute(aircraft, in state, in c, in env, Span<SurfaceForceInfo>.Empty);
                 c = controls; c.Yaw += h;
-                AircraftForces ly = FlightDynamics.Compute(aircraft, in state, in c, Vector3.Zero, in air, Span<SurfaceForceInfo>.Empty);
+                AircraftForces ly = FlightDynamics.Compute(aircraft, in state, in c, in env, Span<SurfaceForceInfo>.Empty);
 
                 float a = (lr.Torque.X - rx) / h, b = (ly.Torque.X - rx) / h;
                 float d = (lr.Torque.Z - rz) / h, e = (ly.Torque.Z - rz) / h;
@@ -188,8 +190,19 @@ namespace Cirrus.Flight
 
                 float dRoll = (rx * e - b * rz) / det;
                 float dYaw = (a * rz - rx * d) / det;
-                controls.Roll = Math.Clamp(controls.Roll - Math.Clamp(dRoll, -0.2f, 0.2f), -1f, 1f);
-                controls.Yaw = Math.Clamp(controls.Yaw - Math.Clamp(dYaw, -0.2f, 0.2f), -1f, 1f);
+
+                // Near the stall the ailerons lose lift authority while keeping
+                // adverse-yaw drag; the coupled Jacobian goes near-singular and the
+                // full Newton step explodes. Fall back to damped diagonal
+                // (Gauss-Seidel) steps, which stay direction-correct.
+                if (MathF.Abs(dRoll) > 1f || MathF.Abs(dYaw) > 1f)
+                {
+                    dRoll = MathF.Abs(a) > 1e-3f ? 0.5f * rx / a : 0f;
+                    dYaw = MathF.Abs(e) > 1e-3f ? 0.5f * rz / e : 0f;
+                }
+
+                controls.Roll = Math.Clamp(controls.Roll - Math.Clamp(dRoll, -0.1f, 0.1f), -1f, 1f);
+                controls.Yaw = Math.Clamp(controls.Yaw - Math.Clamp(dYaw, -0.1f, 0.1f), -1f, 1f);
             }
         }
 
@@ -205,19 +218,21 @@ namespace Cirrus.Flight
                 for (int iter = 0; iter < 15; iter++)
                 {
                     RigidBodyState s = RigidBodyState.LevelFlight(speed, altitude, theta);
-                    AircraftForces l = FlightDynamics.Compute(aircraft, in s, in controls, Vector3.Zero, in air, Span<SurfaceForceInfo>.Empty);
+                    FlightEnvironment env = FlightEnvironment.FreeAir(in air);
+                    AircraftForces l = FlightDynamics.Compute(aircraft, in s, in controls, in env, Span<SurfaceForceInfo>.Empty);
                     if (MathF.Abs(l.Torque.Y) < 1f) break;
 
                     const float h = 1e-3f;
                     ControlInputs c = controls; c.Pitch += h;
-                    AircraftForces lp = FlightDynamics.Compute(aircraft, in s, in c, Vector3.Zero, in air, Span<SurfaceForceInfo>.Empty);
+                    AircraftForces lp = FlightDynamics.Compute(aircraft, in s, in c, in env, Span<SurfaceForceInfo>.Empty);
                     float slope = (lp.Torque.Y - l.Torque.Y) / h;
                     if (MathF.Abs(slope) < 1e-4f) break;
                     controls.Pitch = Math.Clamp(controls.Pitch - l.Torque.Y / slope, -1f, 1f);
                 }
 
                 RigidBodyState st = RigidBodyState.LevelFlight(speed, altitude, theta);
-                AircraftForces loads = FlightDynamics.Compute(aircraft, in st, in controls, Vector3.Zero, in air, Span<SurfaceForceInfo>.Empty);
+                FlightEnvironment outerEnv = FlightEnvironment.FreeAir(in air);
+                AircraftForces loads = FlightDynamics.Compute(aircraft, in st, in controls, in outerEnv, Span<SurfaceForceInfo>.Empty);
                 float lift = MathUtil.BodyToWorld(st.Orientation, loads.Force).Z;
                 if (lift > best) best = lift;
             }

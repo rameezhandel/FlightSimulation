@@ -33,6 +33,15 @@ namespace Cirrus.Flight
         public float MaxControlDeflection; // rad
         public float ControlGain;          // signed; mirrored -1 for e.g. the right aileron
 
+        /// <summary>Fraction of the propeller slipstream's axial increment this surface sees (0 = outside the tube).</summary>
+        public float SlipstreamAxial;
+
+        /// <summary>
+        /// Signed lateral (+Y) air velocity this surface sees per unit of slipstream
+        /// increment, from swirl. Positive = air pushed toward the right wing.
+        /// </summary>
+        public float SlipstreamSwirl;
+
         /// <summary>
         /// 2D lift slope corrected for finite aspect ratio,
         /// a = a0 / (1 + a0 / (pi * AR * e)) — lifting-line approximation applied

@@ -109,10 +109,10 @@ namespace Cirrus.Tests.Flight
             TrimResult trim = TrimSolver.SolveLevelFlight(_beaver, speed, 500f);
             Assert.IsTrue(trim.Converged);
 
-            AirState air = IsaAtmosphere.AtAltitude(500f);
+            FlightEnvironment env = FlightEnvironment.FreeAirAtAltitude(500f);
             RigidBodyState disturbed = RigidBodyState.LevelFlight(speed, 500f, trim.PitchAngle + 3f * MathUtil.DegToRad);
             AircraftForces loads = FlightDynamics.Compute(
-                _beaver, in disturbed, trim.Controls, Vector3.Zero, in air, Span<SurfaceForceInfo>.Empty);
+                _beaver, in disturbed, trim.Controls, in env, Span<SurfaceForceInfo>.Empty);
 
             Assert.Greater(loads.Torque.Y, 200f,
                 "3 deg pitch-up must produce a clear nose-down (+Y) restoring moment");

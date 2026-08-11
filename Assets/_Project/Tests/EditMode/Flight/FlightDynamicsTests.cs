@@ -20,8 +20,8 @@ namespace Cirrus.Tests.Flight
 
         static AircraftForces Forces(AircraftDefinition aircraft, in RigidBodyState state, in ControlInputs controls)
         {
-            AirState air = IsaAtmosphere.AtAltitude(state.Position.Z);
-            return FlightDynamics.Compute(aircraft, in state, in controls, Vector3.Zero, in air, Span<SurfaceForceInfo>.Empty);
+            FlightEnvironment env = FlightEnvironment.FreeAirAtAltitude(state.Position.Z);
+            return FlightDynamics.Compute(aircraft, in state, in controls, in env, Span<SurfaceForceInfo>.Empty);
         }
 
         static RigidBodyState Cruise(float pitchDeg = 2f)
@@ -119,29 +119,34 @@ namespace Cirrus.Tests.Flight
         {
             RigidBodyState state = Cruise();
             var perSurface = new SurfaceForceInfo[_beaver.Surfaces.Length];
-            AirState air = IsaAtmosphere.AtAltitude(state.Position.Z);
+            FlightEnvironment env = FlightEnvironment.FreeAirAtAltitude(state.Position.Z);
             var controls = new ControlInputs();
-            AircraftForces loads = FlightDynamics.Compute(_beaver, in state, in controls, Vector3.Zero, in air, perSurface);
+            AircraftForces loads = FlightDynamics.Compute(_beaver, in state, in controls, in env, perSurface);
 
             Vector3 sum = Vector3.Zero;
             foreach (SurfaceForceInfo info in perSurface) sum += info.Force;
 
-            // Totals additionally include fuselage flat-plate drag (no thrust at idle),
-            // so the surface sum must match totals up to that known drag term.
+            // Totals additionally include fuselage flat-plate drag and the idle
+            // windmilling-prop drag (no thrust at idle), so the surface sum must
+            // match totals up to those known drag terms.
             float vMag = state.Velocity.Length();
-            float fuselageDrag = 0.5f * air.Density * vMag * vMag * _beaver.EquivalentFlatPlateArea;
-            Assert.AreEqual(0f, (loads.Force - sum).Length() - fuselageDrag, 5f);
+            float fuselageDrag = 0.5f * env.Air.Density * vMag * vMag * _beaver.EquivalentFlatPlateArea;
+            System.Numerics.Vector3 vBody = MathUtil.WorldToBody(state.Orientation, state.Velocity);
+            float axial = MathF.Max(0f, vBody.X);
+            float windmillDrag = _beaver.Propeller.WindmillDrag(0f, _beaver.Engine.RatedPower, axial, env.Air.Density);
+            Assert.AreEqual(0f, (loads.Force - sum).Length() - fuselageDrag - windmillDrag, 10f);
         }
 
         [Test]
         public void HeadwindIncreasesLift()
         {
             RigidBodyState state = Cruise();
-            AirState air = IsaAtmosphere.AtAltitude(state.Position.Z);
+            FlightEnvironment calmEnv = FlightEnvironment.FreeAirAtAltitude(state.Position.Z);
+            FlightEnvironment windyEnv = calmEnv;
+            windyEnv.Wind = new Vector3(-10f, 0f, 0f);
             var controls = new ControlInputs();
-            var headwind = new Vector3(-10f, 0f, 0f);
-            AircraftForces calm = FlightDynamics.Compute(_beaver, in state, in controls, Vector3.Zero, in air, Span<SurfaceForceInfo>.Empty);
-            AircraftForces windy = FlightDynamics.Compute(_beaver, in state, in controls, in headwind, in air, Span<SurfaceForceInfo>.Empty);
+            AircraftForces calm = FlightDynamics.Compute(_beaver, in state, in controls, in calmEnv, Span<SurfaceForceInfo>.Empty);
+            AircraftForces windy = FlightDynamics.Compute(_beaver, in state, in controls, in windyEnv, Span<SurfaceForceInfo>.Empty);
             Assert.Greater(
                 MathUtil.BodyToWorld(state.Orientation, windy.Force).Z,
                 MathUtil.BodyToWorld(state.Orientation, calm.Force).Z);

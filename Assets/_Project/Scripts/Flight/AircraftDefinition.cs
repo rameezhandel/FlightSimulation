@@ -28,5 +28,6 @@ namespace Cirrus.Flight
 
         public float ReferenceArea;  // m^2, for coefficient readouts only
         public float ReferenceChord; // m
+        public float ReferenceSpan;  // m, wing span; drives the ground-effect height ratio
     }
 }

@@ -71,6 +71,23 @@ adds `ΔCm ≈ −0.25·ΔCl` and quadratic drag.
   in-flight `T = η_max·P/V`.
 - Reaction torque `P/ω_rated` about the prop axis: with US-rotation engines this
   is a **left-rolling** tendency, and it is why the trim solver carries lateral trim.
+- **Slipstream**: actuator-disc far-field increment `w = sqrt(V² + 2T/(ρA)) − V`;
+  tail strips see a per-surface fraction of it axially (elevator/rudder authority
+  grows with power at low speed), and the fin additionally sees a swirl component
+  (air toward +Y above the axis for US rotation) that yaws the nose left under
+  power — powered trim carries right rudder, emergently.
+- **P-factor**: the thrust centroid shifts laterally with alpha
+  (`PFactorArmPerRad`), adding nose-left yaw in a powered climb.
+- **Windmilling**: an idle prop is a drag disc (`WindmillDragArea`), fading out
+  as shaft power rises past 5% rated.
+
+## Ground effect
+
+McCormick (1979) induced-drag factor `φ = (16h/b)² / (1 + (16h/b)²)`, applied to
+every strip's induced-drag term when a ground elevation is supplied via
+`FlightEnvironment` (h measured CG-to-ground; free air = `-inf`, the default in
+the trim/performance solvers so published free-air figures stay comparable).
+Only meaningful below ~0.2 spans — flare height — which matches the model.
 
 ## Trim & performance validation (`TrimSolver`, `BeaverValidationTests`)
 
@@ -86,21 +103,22 @@ Current measured values, DHC-2 Beaver landplane at MTOW (gates per CLAUDE.md §4
 | Quantity | Model | Published | Gate |
 |---|---|---|---|
 | Stall, full flap | 52.8 kt | 52.1 kt (60 mph) | ±3 kt |
-| Stall, clean | 65.2 kt | (no verified figure; bracketed 55–68 kt) | — |
-| Cruise, 75% power | 122.8 kt | 124.3 kt (143 mph) | ±5 kt |
-| Best climb, sea level | 1045 fpm | 1020 fpm | ±100 fpm |
+| Stall, clean | 65.3 kt | (no verified figure; bracketed 55–68 kt) | — |
+| Cruise, 75% power | 122.3 kt | 124.3 kt (143 mph) | ±5 kt |
+| Best climb, sea level | 1038 fpm | 1020 fpm | ±100 fpm |
 
 Published figures are the Wikipedia DHC-2 spec sheet (landplane) pending POH
 verification — see `[W]`/`[EST]` source tags in `BeaverDefinition`. Tuning rule:
 adjust `[EST]` constants only; `[W]` targets are never touched.
 
-## Known limitations (accepted for now, revisit before M1 closes)
+## Known limitations (accepted for now)
 
-- **No propeller slipstream over wing/tail, no P-factor, no windmilling drag** —
-  the prop is a point thrust plus reaction torque. Planned: blade-element prop.
-- **No ground effect** — needs terrain height input; wire up alongside the
-  ground-plane collision work.
 - **Quasi-static engine** — no RPM dynamics, mixture, or carb ice.
+- **Slipstream/P-factor are momentum-theory approximations**, not a
+  blade-element propeller; slipstream skips the wing-root strips.
+- **Best-climb speed comes out high** (~87 kt vs a real Beaver's ~70):
+  the parabolic profile-drag polar underestimates low-speed drag. Revisit
+  with POH drag data; the climb-rate gate itself is green.
 - **No aileron droop / flaperons** (the real Beaver droops ailerons with flaps).
 - **Fixed CG, diagonal inertia tensor** (Ixz dropped); loading/fuel-burn later.
 - **Landplane, not floats** — the reference aircraft is the float variant, but

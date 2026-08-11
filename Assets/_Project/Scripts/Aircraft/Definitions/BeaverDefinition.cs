@@ -112,6 +112,7 @@ namespace Cirrus.Aircraft
                     Control = ControlAxis.Pitch,
                     MaxControlDeflection = 25f * MathUtil.DegToRad, // [EST]
                     ControlGain = -1f,
+                    SlipstreamAxial = 0.8f,                         // inside the prop tube [EST]
                 };
             }
 
@@ -131,6 +132,8 @@ namespace Cirrus.Aircraft
                 Control = ControlAxis.Yaw,
                 MaxControlDeflection = 25f * MathUtil.DegToRad, // [EST]
                 ControlGain = 1f,
+                SlipstreamAxial = 0.8f,                         // [EST]
+                SlipstreamSwirl = 0.15f,                        // [EST] air toward +Y above the axis
             };
 
             return new AircraftDefinition
@@ -150,11 +153,15 @@ namespace Cirrus.Aircraft
                     Diameter = 2.59f,                             // m, 8 ft 6 in [EST]
                     PeakEfficiency = 0.82f,                       // [EST] tuned vs cruise
                     StaticFigureOfMerit = 0.50f,                  // [EST] tuned vs climb
+                    WindmillDragArea = 0.5f,                      // m^2 at idle [EST]
+                    PFactorArmPerRad = 0.4f,                      // m/rad thrust-centroid shift [EST]
+                    SwirlFraction = 0.15f,                        // slipstream swirl vs axial [EST]
                 },
                 PropellerPosition = new Vector3(2.3f, 0f, 0f),    // [EST]
                 PropellerAxis = Vector3.UnitX,
                 ReferenceArea = WingArea,
                 ReferenceChord = WingChord,
+                ReferenceSpan = WingSpan,
             };
         }
 
