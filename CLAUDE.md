@@ -230,6 +230,11 @@ Done:
   purity) + MonoBehaviour glue: `FlightBody` (per-surface AddForceAtPosition),
   `CoreFrame` (the one Unity<->core conversion), dev input, chase camera, dev
   overlay, procedural M1 test scene (`M1Bootstrap`). See `docs/decisions/0002`.
+- Flight recorder (§8): 10 Hz full-state ring buffer in-app (press R to dump),
+  versioned binary format, deterministic headless replay via `FlightReplay`;
+  repro workflow documented in `Tests/Recordings/README.md`. The Unity glue
+  additionally passes a stub-API compile check, but has still never been
+  compiled by a real Unity Editor.
 
 Next (needs the Unity Editor — follow the first-open checklist in decision
 0002, then commit the generated metas):
