@@ -25,6 +25,7 @@
   <ItemGroup>
     <Compile Include="../../Assets/_Project/Scripts/Flight/**/*.cs" LinkBase="Flight" />
     <Compile Include="../../Assets/_Project/Scripts/Aircraft/Definitions/**/*.cs" LinkBase="Aircraft" />
+    <Compile Include="../../Assets/_Project/Scripts/Terrain/Core/**/*.cs" LinkBase="Terrain" />
     <Compile Include="../../Assets/_Project/Tests/EditMode/Flight/**/*.cs" LinkBase="Tests" />
   </ItemGroup>
 
