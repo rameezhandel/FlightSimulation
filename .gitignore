@@ -1,0 +1,37 @@
+# Unity
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+*.csproj
+*.sln
+*.unityproj
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+sysinfo.txt
+crashlytics-build.properties
+
+# Keep the headless test harness project files (Unity-generated csproj/sln above are
+# ignored; these are hand-authored and live outside Assets/).
+!tools/flightcore-tests/*.csproj
+
+# .NET build output (headless test harness)
+bin/
+obj/
+.vs/
+.idea/
+
+# OS
+.DS_Store

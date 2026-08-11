@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Headless test harness for the pure-C# flight core.
+
+    Compiles the aero sources from Assets/_Project/Scripts/{Flight,Aircraft} plus the
+    NUnit tests from Assets/_Project/Tests/EditMode by link, so `dotnet test` runs the
+    exact same files Unity Test Framework will run in-editor. No Unity required.
+
+    LangVersion is pinned to 9.0 to stay within what Unity 6 compiles.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <AssemblyName>FlightCore.Tests</AssemblyName>
+    <RootNamespace>Cirrus.Flight.Tests</RootNamespace>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../../Assets/_Project/Scripts/Flight/**/*.cs" LinkBase="Flight" />
+    <Compile Include="../../Assets/_Project/Scripts/Aircraft/**/*.cs" LinkBase="Aircraft" />
+    <Compile Include="../../Assets/_Project/Tests/EditMode/**/*.cs" LinkBase="Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
+    <PackageReference Include="NUnit" Version="3.14.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
+  </ItemGroup>
+
+</Project>
