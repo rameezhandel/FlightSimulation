@@ -1,0 +1,28 @@
+{
+    "name": "Cirrus.Tests.EditMode",
+    "rootNamespace": "Cirrus.Tests",
+    "references": [
+        "Cirrus.Flight",
+        "Cirrus.Aircraft.Definitions",
+        "Cirrus.Terrain",
+        "Cirrus.Atmosphere",
+        "Cirrus.Runtime",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

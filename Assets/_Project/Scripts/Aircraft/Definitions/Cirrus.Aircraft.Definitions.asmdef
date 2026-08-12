@@ -1,0 +1,16 @@
+{
+    "name": "Cirrus.Aircraft.Definitions",
+    "rootNamespace": "Cirrus.Aircraft",
+    "references": [
+        "Cirrus.Flight"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": true
+}
