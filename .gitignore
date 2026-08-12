@@ -33,5 +33,10 @@ obj/
 .vs/
 .idea/
 
+# Python (tools/)
+__pycache__/
+*.py[cod]
+.venv/
+
 # OS
 .DS_Store
