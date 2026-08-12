@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Cirrus.Navigation;
 using Cirrus.Terrain;
 using NUnit.Framework;
 
@@ -20,7 +21,7 @@ namespace Cirrus.Tests.Terrain
         [Test]
         public void RoundTripIsExact()
         {
-            var juneau = Airports.JuneauGeo;
+            GeoPoint juneau = SoutheastAlaskaAirports.Juneau.Position;
             GeoPoint back = RegionProjection.ToGeo(RegionProjection.ToLocal(juneau));
             Assert.AreEqual(juneau.Latitude, back.Latitude, 1e-5);
             Assert.AreEqual(juneau.Longitude, back.Longitude, 1e-5);
@@ -256,16 +257,16 @@ namespace Cirrus.Tests.Terrain
         [Test]
         public void JuneauRunwayPadIsFlatAtFieldElevation()
         {
-            IHeightSource source = Airports.WithJuneau(new SyntheticAlaskaHeightSource());
-            LocalNE pajn = RegionProjection.ToLocal(Airports.JuneauGeo);
-            float heading = Airports.JuneauRunwayHeading * MathF.PI / 180f;
+            IHeightSource source = RunwayTerrain.WithPads(new SyntheticAlaskaHeightSource(), SoutheastAlaskaAirports.Juneau);
+            LocalNE pajn = SoutheastAlaskaAirports.Juneau.Local;
+            float heading = SoutheastAlaskaAirports.Juneau.Runways[0].TrueHeading * MathF.PI / 180f;
 
             // Sample along the centreline.
             for (float along = -1300f; along <= 1300f; along += 100f)
             {
                 float north = pajn.North + along * MathF.Cos(heading);
                 float east = pajn.East + along * MathF.Sin(heading);
-                Assert.AreEqual(Airports.JuneauFieldElevation, source.SampleElevation(north, east), 1e-3f,
+                Assert.AreEqual(SoutheastAlaskaAirports.Juneau.Runways[0].ElevationMeters, source.SampleElevation(north, east), 1e-3f,
                     $"runway not flat at {along} m from the threshold midpoint");
             }
         }
@@ -274,8 +275,8 @@ namespace Cirrus.Tests.Terrain
         public void RunwayPadBlendsBackToTerrain()
         {
             var raw = new SyntheticAlaskaHeightSource();
-            IHeightSource padded = Airports.WithJuneau(raw);
-            LocalNE pajn = RegionProjection.ToLocal(Airports.JuneauGeo);
+            IHeightSource padded = RunwayTerrain.WithPads(raw, SoutheastAlaskaAirports.Juneau);
+            LocalNE pajn = SoutheastAlaskaAirports.Juneau.Local;
             // 3 km north of the field, the pad must have no influence at all.
             float north = pajn.North + 3000f;
             Assert.AreEqual(raw.SampleElevation(north, pajn.East), padded.SampleElevation(north, pajn.East));

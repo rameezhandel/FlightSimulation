@@ -2,6 +2,7 @@ using System;
 using Cirrus.Aircraft;
 using Cirrus.CameraRigs;
 using Cirrus.Flight;
+using Cirrus.Navigation;
 using Cirrus.Terrain;
 using Cirrus.TerrainStreaming;
 using UnityEngine;
@@ -37,8 +38,10 @@ namespace Cirrus.Core
 
             // Spawn on final approach: back up from the PAJN threshold along the
             // runway heading, in region coordinates.
-            LocalNE pajn = RegionProjection.ToLocal(Airports.JuneauGeo);
-            float heading = Airports.JuneauRunwayHeading * Mathf.Deg2Rad;
+            Airport juneau = SoutheastAlaskaAirports.Juneau;
+            LocalNE pajn = juneau.Local;
+            float runwayHeading = juneau.Runways[0].TrueHeading;
+            float heading = runwayHeading * Mathf.Deg2Rad;
             var spawnRegion = new LocalNE(
                 pajn.North - FinalDistance * Mathf.Cos(heading),
                 pajn.East - FinalDistance * Mathf.Sin(heading));
@@ -51,7 +54,10 @@ namespace Cirrus.Core
             origin.Initialize(spawnRegion, flight.transform);
             origin.Register(flight.transform);
 
-            IHeightSource source = Airports.WithJuneau(new SyntheticAlaskaHeightSource());
+            // Real DEM tiles when the pipeline has produced them, synthetic fjords
+            // otherwise; runway pads flattened on top either way.
+            IHeightSource source = RunwayTerrain.WithAllRegionPads(
+                TerrainStreamer.CreateShippedSource(new SyntheticAlaskaHeightSource()));
             var streamer = originObject.AddComponent<TerrainStreamer>();
             streamer.Initialize(source, origin, flight.transform);
             flight.GroundElevationProvider = streamer.SampleElevation;
@@ -94,7 +100,7 @@ namespace Cirrus.Core
             TrimResult trim = TrimSolver.SolveLevelFlight(flight.Aircraft, speed, SpawnAltitude);
 
             // Face the runway: yaw to the runway heading, pitched at the trim attitude.
-            var yaw = Quaternion.Euler(0f, Airports.JuneauRunwayHeading, 0f);
+            var yaw = Quaternion.Euler(0f, SoutheastAlaskaAirports.Juneau.Runways[0].TrueHeading, 0f);
             Quaternion attitude = trim.Converged
                 ? yaw * CoreFrame.ToUnity(trim.State.Orientation)
                 : yaw;

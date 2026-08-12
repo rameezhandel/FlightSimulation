@@ -27,7 +27,10 @@
     <Compile Include="../../Assets/_Project/Scripts/Aircraft/Definitions/**/*.cs" LinkBase="Aircraft" />
     <Compile Include="../../Assets/_Project/Scripts/Terrain/Core/**/*.cs" LinkBase="Terrain" />
     <Compile Include="../../Assets/_Project/Scripts/Atmosphere/Core/**/*.cs" LinkBase="Atmosphere" />
-    <Compile Include="../../Assets/_Project/Tests/EditMode/Flight/**/*.cs" LinkBase="Tests" />
+    <Compile Include="../../Assets/_Project/Scripts/Navigation/Core/**/*.cs" LinkBase="Navigation" />
+    <Compile Include="../../Assets/_Project/Tests/EditMode/**/*.cs"
+             Exclude="../../Assets/_Project/Tests/EditMode/Unity/**/*.cs"
+             LinkBase="Tests" />
   </ItemGroup>
 
   <ItemGroup>

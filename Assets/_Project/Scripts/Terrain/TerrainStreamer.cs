@@ -39,6 +39,19 @@ namespace Cirrus.TerrainStreaming
         readonly ConcurrentQueue<TileMeshData> _completed = new ConcurrentQueue<TileMeshData>();
         float _nextSelect;
 
+        /// <summary>
+        /// Builds the shipped-tile source: the .ctil pyramid under StreamingAssets
+        /// (written by tools/terrain-pipeline), falling back to the supplied source
+        /// wherever tiles are absent — so an unbuilt or partial pyramid still flies.
+        /// </summary>
+        public static IHeightSource CreateShippedSource(IHeightSource fallback)
+        {
+            string directory = System.IO.Path.Combine(Application.streamingAssetsPath, "Terrain");
+            if (!System.IO.Directory.Exists(directory))
+                return fallback; // pipeline has not been run yet
+            return new TilePyramidHeightSource(new DirectoryTileByteSource(directory), fallback);
+        }
+
         public void Initialize(IHeightSource source, FloatingOrigin origin, Transform viewer)
         {
             _source = source;

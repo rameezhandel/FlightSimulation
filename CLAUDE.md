@@ -216,11 +216,13 @@ post-launch. Do not start it early.
 
 ## 11. Current status
 
-M1 code-complete headlessly; M2/M3 cores built. 83 headless tests green
+M1 code-complete headlessly; M2/M3 cores built. 126 headless tests green
 (`dotnet test tools/flightcore-tests`), 8 Python pipeline tests green
-(`python3 -m unittest test_pipeline` in `tools/terrain-pipeline`). All Unity
-code passes a stub-API compile check but has NEVER been compiled by a real
-Unity Editor — that is the single biggest outstanding risk.
+(`python3 -m unittest test_pipeline` in `tools/terrain-pipeline`); both run in
+CI on every push (`.github/workflows/tests.yml`, which also enforces the §4
+no-Unity-types rule). All Unity code passes a stub-API compile check but has
+NEVER been compiled by a real Unity Editor — the single biggest outstanding
+risk.
 
 Done:
 - Flight core (§4): blade-element aero, post-stall airfoil, trim solver,
@@ -241,6 +243,15 @@ Done:
   pipeline in `tools/terrain-pipeline`. `M2TerrainBootstrap` = drop-in scene.
 - M3 core: deterministic wind field (boundary-layer profile, gusts,
   turbulence; Calm/Breeze/Storm presets) wired into the flight model.
+- File-backed tile source: `TilePyramidHeightSource` reads the shipped `.ctil`
+  pyramid (finest-available level, LRU cache, corrupt/misfiled tiles rejected,
+  thread-safe), falling back to synthetic terrain wherever tiles are absent —
+  so a partial pyramid still flies.
+- `Navigation/`: bearings + magnetic variation, airports/runways (designators
+  derived from true heading), airport database, flight plan with cross-track
+  and along-track, VOR/DME/ADF radio nav. **All airport and navaid data is
+  hand-entered `[OA]`/`[EST]` and unverified — replace it with OurAirports
+  data before shipping.**
 
 Known deviations (decision 0003): meshing on ThreadPool not Jobs/Burst yet;
 water is the forbidden blue plane until the real water system lands.
@@ -248,8 +259,9 @@ water is the forbidden blue plane until the real water system lands.
 Next:
 - IN EDITOR (first-open checklist in decision 0002): compile everything, run
   the Unity-only tests, fly M1Bootstrap then M2TerrainBootstrap, commit metas.
-- Then, in rough order: real water system; file-backed tile source +
-  StreamingAssets pipeline output; landcover texturing (WorldCover); Burst
+- Then, in rough order: real water system; run the DEM pipeline and ship its
+  output in StreamingAssets; verify nav data against OurAirports; landcover
+  texturing (WorldCover); Burst
   meshing port; M3 rendering (scattering, clouds, time of day); M4 product
   work (cockpit, instruments, menus, flight planning, save, touch schemes,
   tutorial). M4 is deliberately untouched — it is all editor-bound UI work.

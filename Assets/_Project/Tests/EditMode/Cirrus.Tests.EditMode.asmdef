@@ -6,6 +6,7 @@
         "Cirrus.Aircraft.Definitions",
         "Cirrus.Terrain",
         "Cirrus.Atmosphere",
+        "Cirrus.Navigation",
         "Cirrus.Runtime",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"

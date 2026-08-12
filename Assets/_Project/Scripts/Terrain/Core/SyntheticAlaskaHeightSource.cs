@@ -134,27 +134,4 @@ namespace Cirrus.Terrain
             return _elevation + (_inner.SampleElevation(north, east) - _elevation) * t;
         }
     }
-
-    /// <summary>The M2 airport (CLAUDE.md §10): Juneau International.</summary>
-    public static class Airports
-    {
-        // PAJN: 58.3547 N, 134.5763 W, field elevation ~6.4 m, runway 08/26,
-        // 2713 m x 46 m. True heading ~095 deg (080 magnetic + ~15E variation).
-        // [EST] verify heading/coords against the AF/D before M2 closes.
-        public static readonly GeoPoint JuneauGeo = new GeoPoint(58.3547, -134.5763);
-        public const float JuneauRunwayHeading = 95f;
-        public const float JuneauRunwayLength = 2713f;
-        public const float JuneauRunwayWidth = 46f;
-        public const float JuneauFieldElevation = 6.4f;
-
-        /// <summary>Wraps a height source with the PAJN runway pad.</summary>
-        public static IHeightSource WithJuneau(IHeightSource source)
-            => new RunwayPadHeightSource(
-                source,
-                RegionProjection.ToLocal(JuneauGeo),
-                JuneauRunwayHeading,
-                JuneauRunwayLength,
-                JuneauRunwayWidth,
-                JuneauFieldElevation);
-    }
 }

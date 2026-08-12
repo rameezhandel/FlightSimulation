@@ -6,6 +6,7 @@
         "Cirrus.Aircraft.Definitions",
         "Cirrus.Terrain",
         "Cirrus.Atmosphere",
+        "Cirrus.Navigation",
         "Unity.InputSystem"
     ],
     "includePlatforms": [],

@@ -33,6 +33,19 @@ namespace Cirrus.Terrain
         public TileAddress Child(int childX, int childY)
             => new TileAddress(Level + 1, X * 2 + childX, Y * 2 + childY);
 
+        public TileAddress Parent
+            => Level <= 0 ? new TileAddress(0, 0, 0) : new TileAddress(Level - 1, X / 2, Y / 2);
+
+        /// <summary>The tile at <paramref name="level"/> containing a point; clamped to the region.</summary>
+        public static TileAddress ForPoint(int level, in LocalNE point)
+        {
+            int count = 1 << level;
+            float size = Region.Size / count;
+            int x = Math.Clamp((int)MathF.Floor((point.North + Region.HalfSize) / size), 0, count - 1);
+            int y = Math.Clamp((int)MathF.Floor((point.East + Region.HalfSize) / size), 0, count - 1);
+            return new TileAddress(level, x, y);
+        }
+
         /// <summary>Shortest horizontal distance from a point to this tile's footprint (0 inside).</summary>
         public float DistanceTo(in LocalNE p)
         {

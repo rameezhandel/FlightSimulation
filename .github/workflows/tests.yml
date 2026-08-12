@@ -1,0 +1,59 @@
+name: tests
+
+# Guards the two headless suites and the CLAUDE.md §4 purity rule. Unity-side
+# code is NOT compiled here (no Unity licence in CI) — see docs/decisions/0002.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  flight-core:
+    name: flight core (dotnet test)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Test
+        run: dotnet test tools/flightcore-tests --nologo --verbosity minimal
+
+  terrain-pipeline:
+    name: terrain pipeline (unittest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install numpy
+      - name: Test
+        working-directory: tools/terrain-pipeline
+        run: python -m unittest test_pipeline --verbose
+
+  core-purity:
+    name: core purity (no Unity types in the pure layer)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assert no UnityEngine references in pure assemblies
+        run: |
+          set -e
+          pure_dirs="
+            Assets/_Project/Scripts/Flight
+            Assets/_Project/Scripts/Aircraft/Definitions
+            Assets/_Project/Scripts/Terrain/Core
+            Assets/_Project/Scripts/Atmosphere/Core
+            Assets/_Project/Scripts/Navigation/Core
+          "
+          fail=0
+          for dir in $pure_dirs; do
+            if grep -rn "UnityEngine" "$dir" --include="*.cs"; then
+              echo "::error::$dir must not reference UnityEngine (CLAUDE.md §4)"
+              fail=1
+            fi
+          done
+          exit $fail
