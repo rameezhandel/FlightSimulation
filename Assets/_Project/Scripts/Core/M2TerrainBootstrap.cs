@@ -90,6 +90,10 @@ namespace Cirrus.Core
             var body = root.AddComponent<Rigidbody>();
             FlightBody flight = root.AddComponent<FlightBody>();
             var input = root.AddComponent<FlightInputController>();
+            // Touch controls own input on device; the keyboard/gamepad path stays
+            // for the editor. TouchFlightControls writes Controls every frame, so
+            // it runs after FlightInputController and wins where both are present.
+            var touch = root.AddComponent<Cirrus.UI.TouchFlightControls>();
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             root.AddComponent<Cirrus.DebugTools.FlightRecorder>();
 #endif

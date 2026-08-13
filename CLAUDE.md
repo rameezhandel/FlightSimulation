@@ -216,7 +216,7 @@ post-launch. Do not start it early.
 
 ## 11. Current status
 
-M1 code-complete headlessly; M2/M3 cores built. 126 headless tests green
+M1 code-complete headlessly; M2/M3 cores built; touch controls in. 175 headless tests green
 (`dotnet test tools/flightcore-tests`), 8 Python pipeline tests green
 (`python3 -m unittest test_pipeline` in `tools/terrain-pipeline`); both run in
 CI on every push (`.github/workflows/tests.yml`, which also enforces the §4
@@ -247,6 +247,12 @@ Done:
   pyramid (finest-available level, LRU cache, corrupt/misfiled tiles rejected,
   thread-safe), falling back to synthetic terrain wherever tiles are absent —
   so a partial pyramid still flies.
+- Touch controls (first slice of M4, pulled forward so the app is flyable on a
+  phone with nothing attached): pure `UI/Core` layer — response curves, floating
+  virtual stick, throttle slider, tilt model with calibration, turn coordinator,
+  safe-area layout, and a finger-tracking state machine — plus
+  `TouchFlightControls` (Canvas visuals, EnhancedTouch, gravity sensor) and
+  `PlatformSetup` (60 fps target, physics catch-up cap, landscape lock).
 - `Navigation/`: bearings + magnetic variation, airports/runways (designators
   derived from true heading), airport database, flight plan with cross-track
   and along-track, VOR/DME/ADF radio nav. **All airport and navaid data is
@@ -259,6 +265,8 @@ water is the forbidden blue plane until the real water system lands.
 Next:
 - IN EDITOR (first-open checklist in decision 0002): compile everything, run
   the Unity-only tests, fly M1Bootstrap then M2TerrainBootstrap, commit metas.
+- ON DEVICE: build to an iPhone and tune touch feel (stick radius, expo, dead
+  zone, coordinator gains) with an actual thumb — the numbers now are guesses.
 - Then, in rough order: real water system; run the DEM pipeline and ship its
   output in StreamingAssets; verify nav data against OurAirports; landcover
   texturing (WorldCover); Burst

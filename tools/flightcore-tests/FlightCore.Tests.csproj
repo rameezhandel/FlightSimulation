@@ -28,6 +28,7 @@
     <Compile Include="../../Assets/_Project/Scripts/Terrain/Core/**/*.cs" LinkBase="Terrain" />
     <Compile Include="../../Assets/_Project/Scripts/Atmosphere/Core/**/*.cs" LinkBase="Atmosphere" />
     <Compile Include="../../Assets/_Project/Scripts/Navigation/Core/**/*.cs" LinkBase="Navigation" />
+    <Compile Include="../../Assets/_Project/Scripts/UI/Core/**/*.cs" LinkBase="Controls" />
     <Compile Include="../../Assets/_Project/Tests/EditMode/**/*.cs"
              Exclude="../../Assets/_Project/Tests/EditMode/Unity/**/*.cs"
              LinkBase="Tests" />

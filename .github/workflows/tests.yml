@@ -48,6 +48,7 @@ jobs:
             Assets/_Project/Scripts/Terrain/Core
             Assets/_Project/Scripts/Atmosphere/Core
             Assets/_Project/Scripts/Navigation/Core
+            Assets/_Project/Scripts/UI/Core
           "
           fail=0
           for dir in $pure_dirs; do

@@ -25,6 +25,13 @@ namespace Cirrus.Aircraft
         FlightBody _flight = null!;
         float _pitch, _roll, _yaw, _throttle = 0.5f, _flap;
 
+        /// <summary>
+        /// Set by the touch controls while a finger is down, so the two input paths
+        /// never argue. Without this, an untouched keyboard would zero the throttle
+        /// a touch had just set.
+        /// </summary>
+        public bool Suppressed { get; set; }
+
         void Awake() => _flight = GetComponent<FlightBody>();
 
         /// <summary>Seed persistent axes (from the spawn trim) so Update doesn't stomp them.</summary>
@@ -36,6 +43,7 @@ namespace Cirrus.Aircraft
 
         void Update()
         {
+            if (Suppressed) return;
             float dt = Time.deltaTime;
             Keyboard keyboard = Keyboard.current;
             Gamepad gamepad = Gamepad.current;

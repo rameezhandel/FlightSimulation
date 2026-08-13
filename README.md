@@ -24,7 +24,8 @@ aircraft, done properly.
 | Navigation | Bearings, airports/runways, flight plans with cross-track, VOR/DME/ADF. |
 | Tooling | Python DEM pipeline, flight recorder with deterministic replay, dev overlay, CI. |
 | Rendering | Placeholder. No water system, no sky, no clouds — see *Known gaps*. |
-| Product (M4) | Untouched. No cockpit, menus, save, or touch controls yet. |
+| Touch controls | Virtual stick, throttle slider, flap/rudder buttons, tilt scheme, auto-coordination. Safe-area aware. |
+| Product (M4) | Otherwise untouched. No cockpit, menus, flight planning UI, or save. |
 
 The flight model matches published DHC-2 figures within the project's own tolerances:
 
@@ -68,8 +69,13 @@ into an empty scene and press Play.
 | `M1Bootstrap` | Flat checkerboard ground, Beaver spawned trimmed at 300 m, chase camera, dev overlay. |
 | `M2TerrainBootstrap` | Streaming Southeast Alaska terrain, PAJN runway, floating origin, wind, on an 8 km final for Juneau. |
 
-Controls (dev): `W`/`S` or arrows pitch, `A`/`D` roll, `Q`/`E` rudder, `LeftShift`/`LeftCtrl`
-throttle, `F`/`V` flaps, `R` dumps a flight recording. Gamepad works too.
+**On a phone or tablet**, controls are touch: a floating thumb stick on the left (roll and
+pitch), a throttle slider on the right, flap and rudder buttons, and optional auto-coordinated
+rudder. Tilt steering is available as an alternative scheme. Nothing needs to be plugged in.
+
+**In the editor**, the same build also accepts keyboard and gamepad: `W`/`S` or arrows pitch,
+`A`/`D` roll, `Q`/`E` rudder, `LeftShift`/`LeftCtrl` throttle, `F`/`V` flaps, `R` dumps a
+flight recording. The two input paths hand off automatically.
 
 ## Building the terrain data
 
@@ -128,6 +134,8 @@ Called out because they're real, not because they're forgotten:
 - **Airport and navaid data is hand-entered and unverified** — placeholder values pending
   a proper import from OurAirports. Don't navigate by it.
 - **No performance validation on device.** The frame budget is a plan, not a measurement.
+- Touch controls are functional but visually plain — flat translucent shapes generated in
+  code, not designed art. Feel needs tuning with a real thumb.
 - Terrain meshing runs on ThreadPool tasks rather than Burst jobs, and terrain colouring is
   provisional elevation/slope bands. Both are tracked in
   [`docs/decisions/0003`](docs/decisions/0003-terrain-architecture-and-deviations.md).
